@@ -132,3 +132,47 @@ export async function continueSessionStream(
   }], idempotencyKey);
   return relayAndExecute(env, sessionId, stream);
 }
+
+export function relayCreatedSession(
+  env: Env,
+  upstream: ReadableStream<Uint8Array>,
+): ReadableStream<Uint8Array> {
+  const decoder = new TextDecoder();
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const reader = upstream.getReader();
+      let pending = "";
+      let sessionId: string | null = null;
+      try {
+        while (true) {
+          const part = await reader.read();
+          if (part.done) break;
+          controller.enqueue(part.value);
+          pending += decoder.decode(part.value, { stream: true });
+          let splitAt: number;
+          while ((splitAt = pending.indexOf("\n\n")) >= 0) {
+            const frame = pending.slice(0, splitAt);
+            pending = pending.slice(splitAt + 2);
+            const event = eventPayload(frame);
+            if (!event?.type) continue;
+            if (event.type === "agent.session.created") {
+              sessionId = event.data?.id || event.session_id || sessionId;
+            }
+            if ((event.type === "agent.session.requires_action" ||
+                 event.type === "agent.session.action_required") && sessionId) {
+              await resolveActions(env, sessionId);
+            }
+          }
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Agent stream failed";
+        controller.enqueue(new TextEncoder().encode(
+          "event: trip_plan.error\ndata: " + JSON.stringify({ message, session_id: sessionId }) + "\n\n",
+        ));
+      } finally {
+        reader.releaseLock();
+        controller.close();
+      }
+    },
+  });
+}
