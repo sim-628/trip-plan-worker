@@ -26,6 +26,7 @@ All endpoints except GET /health require Authorization: Bearer APP_API_TOKEN.
 | POST | /agent/sessions | Create a managed session, submit first message and stream events |
 | POST | /agent/sessions/{session_id}/messages | Continue an existing session and stream events |
 | GET | /agent/sessions/{session_id} | Retrieve session state, including pending required_actions |
+| GET | /agent/sessions/{session_id}/events | Reconnect to the live event stream and dispatch any newly observed function calls |
 
 ### Create a session
 
