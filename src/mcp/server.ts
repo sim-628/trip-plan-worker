@@ -23,12 +23,12 @@ function registerTool(
   env: Env,
   name: string,
   description: string,
-  inputSchema: Record<string, z.ZodType>,
+  inputSchema: any,
 ) {
   server.registerTool(
     name,
     { description, inputSchema },
-    async (args: Record<string, unknown>) => {
+    async (args: any) => {
       try {
         const result = await executeTool(name, args, env);
         return {
@@ -41,9 +41,9 @@ function registerTool(
   );
 }
 
-export function createGoogleMapsMcpServer(env: Env) {
+export function createTripPlanMcpServer(env: Env) {
   const server = new McpServer({
-    name: "trip-plan-google-maps",
+    name: "trip-plan-supply",
     version: "1.0.0",
   });
 
