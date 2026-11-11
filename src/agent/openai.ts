@@ -15,13 +15,17 @@ async function request<T>(env: Env, path: string, init: RequestInit = {}): Promi
       ...(init.headers || {}),
     },
   });
+  const raw = await response.text();
+  let body: any = null;
+  if (raw) {
+    try { body = JSON.parse(raw); } catch { body = { message: raw }; }
+  }
   if (!response.ok) {
-    const body: any = await response.json().catch(() => null);
     throw new HttpError(response.status >= 500 ? 502 : response.status,
-      body?.error?.message || "OpenAI Agents API request failed",
+      body?.error?.message || body?.message || "OpenAI Agents API request failed",
       body?.error?.code || "OPENAI_API_ERROR");
   }
-  return response.json() as Promise<T>;
+  return body as T;
 }
 
 export async function createSession(env: Env, input: string, model: string, instructions: string) {
