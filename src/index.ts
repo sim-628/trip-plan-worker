@@ -1,7 +1,7 @@
 import { Env, HttpError } from "./types";
 import { OPENAI_TOOLS } from "./tools/definitions";
 import { executeTool, TOOL_NAMES } from "./tools/dispatcher";
-import { startSessionStream, continueSessionStream } from "./agent/runtime";
+import { startSessionStream, continueSessionStream, relayCreatedSession } from "./agent/runtime";
 import { retrieveSession } from "./agent/openai";
 
 function json(data: unknown, status = 200, origin = "*") {
@@ -138,7 +138,7 @@ export default {
           body.model || env.AGENT_MODEL || "gpt-5.4",
           body.instructions || env.AGENT_INSTRUCTIONS || "You are a travel planning assistant. Use the available Google Maps tools to discover places, restaurants and routes. Never claim a booking has been made unless a booking provider confirms it.",
         );
-        return new Response(upstream.body, {
+        return new Response(relayCreatedSession(env, upstream.body!), {
           status: 200,
           headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
