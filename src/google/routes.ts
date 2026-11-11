@@ -7,7 +7,7 @@ const ROUTE_FIELDS = [
   "routes.polyline.encodedPolyline",
   "routes.legs.duration",
   "routes.legs.distanceMeters",
-  "routes.legs.steps.navigationInstruction",
+  "routes.legs.steps.navigationInstruction.instructions",
 ].join(",");
 
 function waypoint(value: any) {
