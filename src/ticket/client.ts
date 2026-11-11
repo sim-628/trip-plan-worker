@@ -49,6 +49,10 @@ function commaList(values: string[], field: string, max: number) {
   return cleaned.join(",");
 }
 
+export async function ticketHealthCheck(env: Env) {
+  return request(env, "/health");
+}
+
 export async function ticketListCountries(env: Env) {
   return request(env, "/countries");
 }
@@ -119,6 +123,29 @@ export async function ticketCheckAvailability(env: Env, args: Record<string, any
   return request(env, "/availability-check", {
     method: "POST",
     body: args.package_lines,
+    language: args.language || "en",
+  });
+}
+
+
+export async function ticketValidateOrder(env: Env, args: Record<string, any>) {
+  if (!args.agent_order_code || args.agent_order_code.length > 64) {
+    throw new HttpError(400, "agent_order_code is required and must be at most 64 characters", "INVALID_ARGUMENT");
+  }
+  if (!Array.isArray(args.items) || args.items.length < 1 || args.items.length > 20) {
+    throw new HttpError(400, "items must contain 1 to 20 package items", "INVALID_ARGUMENT");
+  }
+  if (!args.contact_info?.first_name || !args.contact_info?.family_name || !args.contact_info?.mobile) {
+    throw new HttpError(400, "contact_info.first_name, family_name and mobile are required", "INVALID_ARGUMENT");
+  }
+  return request(env, "/orders/validate", {
+    method: "POST",
+    body: {
+      agent_order_code: args.agent_order_code,
+      ...(args.timestamp !== undefined ? { timestamp: args.timestamp } : {}),
+      contact_info: args.contact_info,
+      items: args.items,
+    },
     language: args.language || "en",
   });
 }
