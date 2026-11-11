@@ -5,7 +5,7 @@ import { startSessionStream, continueSessionStream, relayCreatedSession, relayAn
 import { openEventStream } from "./agent/openai";
 import { retrieveSession } from "./agent/openai";
 import { createMcpHandler } from "agents/mcp/server";
-import { createGoogleMapsMcpServer } from "./mcp/google-server";
+import { createGoogleMapsMcpServer } from "./mcp/server";
 
 function json(data: unknown, status = 200, origin = "*") {
   return new Response(JSON.stringify(data), {
