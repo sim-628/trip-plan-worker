@@ -1,6 +1,9 @@
 export interface Env {
   GOOGLE_MAPS_API_KEY: string;
   APP_API_TOKEN: string;
+  OPENAI_API_KEY: string;
+  AGENT_MODEL?: string;
+  AGENT_INSTRUCTIONS?: string;
   ALLOWED_ORIGIN?: string;
   APP_ENV?: string;
 }
