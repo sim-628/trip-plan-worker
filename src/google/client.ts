@@ -22,13 +22,13 @@ export async function googleJson<T>(
     },
   });
 
-  const body = await response.json().catch(() => null) as T | { error?: { message?: string; status?: string } } | null;
+  const body: any = await response.json().catch(() => null);
   if (!response.ok) {
-    const error = body && typeof body === "object" && "error" in body ? body.error : undefined;
+    const providerError = body && typeof body === "object" ? body.error : undefined;
     throw new HttpError(
       response.status >= 500 ? 502 : response.status,
-      error?.message ?? "Google Maps request failed",
-      error?.status ?? "GOOGLE_API_ERROR",
+      providerError?.message ?? "Google Maps request failed",
+      providerError?.status ?? "GOOGLE_API_ERROR",
     );
   }
   return body as T;
