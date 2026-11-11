@@ -1,7 +1,8 @@
 import { Env, HttpError } from "./types";
 import { OPENAI_TOOLS } from "./tools/definitions";
 import { executeTool, TOOL_NAMES } from "./tools/dispatcher";
-import { startSessionStream, continueSessionStream, relayCreatedSession } from "./agent/runtime";
+import { startSessionStream, continueSessionStream, relayCreatedSession, relayAndExecute } from "./agent/runtime";
+import { openEventStream } from "./agent/openai";
 import { retrieveSession } from "./agent/openai";
 
 function json(data: unknown, status = 200, origin = "*") {
@@ -161,6 +162,22 @@ export default {
           env, decodeURIComponent(messageMatch[1]), body.message, idempotencyKey,
         );
         return new Response(stream, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Headers": "Authorization,Content-Type,Idempotency-Key",
+            "X-Accel-Buffering": "no",
+          },
+        });
+      }
+
+      const eventStreamMatch = url.pathname.match(/^\\/agent\\/sessions\\/([^/]+)\\/events$/);
+      if (eventStreamMatch && request.method === "GET") {
+        const sessionId = decodeURIComponent(eventStreamMatch[1]);
+        const stream = await openEventStream(env, sessionId);
+        return new Response(relayAndExecute(env, sessionId, stream), {
           status: 200,
           headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
