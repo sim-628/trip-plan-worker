@@ -1,6 +1,7 @@
 name = "trip-plan-worker"
 main = "src/index.ts"
 compatibility_date = "2026-11-11"
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 APP_ENV = "production"
