@@ -1,0 +1,12 @@
+name = "trip-plan-worker"
+main = "src/index.ts"
+compatibility_date = "2026-11-11"
+
+[vars]
+APP_ENV = "production"
+# Set ALLOWED_ORIGIN to your app's API origin if browser clients will call this Worker.
+ALLOWED_ORIGIN = "*"
+
+# Configure secrets with:
+# npx wrangler secret put GOOGLE_MAPS_API_KEY
+# npx wrangler secret put APP_API_TOKEN
