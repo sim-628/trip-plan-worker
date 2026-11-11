@@ -57,6 +57,8 @@ Authorization: Bearer <APP_API_TOKEN>
 | POST | `/tools/execute` | Execute one tool |
 | POST | `/agent/sessions` | Create managed Agent session and stream first turn |
 | POST | `/agent/sessions/{session_id}/messages` | Continue a managed session |
+| GET | `/agent/sessions/{session_id}` | Retrieve managed session state |
+| GET | `/agent/sessions/{session_id}/events` | Reconnect to session events |
 | GET | `/agent/sessions/{session_id}` | Retrieve session state |
 
 Example:
