@@ -25,8 +25,15 @@ async function request<T>(env: Env, path: string, init: RequestInit = {}): Promi
 }
 
 export async function createSession(env: Env, input: string, model: string, instructions: string) {
-  return request<any>(env, "/agents/sessions", {
+  if (!env.OPENAI_API_KEY) throw new HttpError(503, "OPENAI_API_KEY is not configured", "OPENAI_NOT_CONFIGURED");
+  const response = await fetch(BASE + "/agents/sessions", {
     method: "POST",
+    headers: {
+      Authorization: "Bearer " + env.OPENAI_API_KEY,
+      "OpenAI-Beta": BETA,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
     body: JSON.stringify({
       environment: { type: "none" },
       agent: {
@@ -39,6 +46,12 @@ export async function createSession(env: Env, input: string, model: string, inst
       stream: true,
     }),
   });
+  if (!response.ok || !response.body) {
+    throw new HttpError(response.status || 502,
+      await response.text().catch(() => "Could not create managed Agent session"),
+      "OPENAI_SESSION_CREATE_FAILED");
+  }
+  return response;
 }
 
 export async function retrieveSession(env: Env, sessionId: string) {
