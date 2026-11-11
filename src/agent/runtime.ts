@@ -127,8 +127,10 @@ export async function continueSessionStream(
   const stream = await openEventStream(env, sessionId);
   await submitEvents(env, sessionId, [{
     type: "agent.session.input.message",
-    role: "user",
-    content: message,
+    input: [{
+      role: "user",
+      content: [{ type: "input_text", text: message }],
+    }],
   }], idempotencyKey);
   return relayAndExecute(env, sessionId, stream);
 }
