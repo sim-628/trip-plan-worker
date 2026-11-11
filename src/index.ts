@@ -31,21 +31,54 @@ function checkCoordinates(lat: unknown, lng: unknown) {
 }
 
 function validateToolInput(name: string, args: Record<string, any>) {
+  if (!TOOL_NAMES.includes(name as typeof TOOL_NAMES[number])) {
+    throw new HttpError(404, `Unknown tool: ${name}`, "UNKNOWN_TOOL");
+  }
   if (args.location) checkCoordinates(args.location.latitude, args.location.longitude);
+
+  for (const key of ["limit"]) {
+    if (args[key] !== undefined && (!Number.isInteger(args[key]) || args[key] < 1 || args[key] > 20)) {
+      throw new HttpError(400, `${key} must be an integer between 1 and 20`, "INVALID_ARGUMENT");
+    }
+  }
+  if (args.radius_meters !== undefined && args.radius_meters !== null &&
+      (!Number.isFinite(args.radius_meters) || args.radius_meters < 100 || args.radius_meters > 50000)) {
+    throw new HttpError(400, "radius_meters must be between 100 and 50000", "INVALID_ARGUMENT");
+  }
+  if (name === "search_places" && (typeof args.query !== "string" || !args.query.trim() || args.query.length > 300)) {
+    throw new HttpError(400, "query must be a non-empty string of at most 300 characters", "INVALID_ARGUMENT");
+  }
   if (name === "search_nearby_places") {
     checkCoordinates(args.location?.latitude, args.location?.longitude);
-    if (!Array.isArray(args.included_types) || args.included_types.length === 0) {
-      throw new HttpError(400, "included_types must be a non-empty array", "INVALID_ARGUMENT");
+    if (!Array.isArray(args.included_types) || args.included_types.length === 0 ||
+        args.included_types.length > 10 || args.included_types.some((v: unknown) => typeof v !== "string" || !v.trim())) {
+      throw new HttpError(400, "included_types must contain 1 to 10 non-empty strings", "INVALID_ARGUMENT");
     }
+  }
+  if (name === "search_restaurants" && (typeof args.area !== "string" || !args.area.trim() || args.area.length > 200)) {
+    throw new HttpError(400, "area must be a non-empty string of at most 200 characters", "INVALID_ARGUMENT");
+  }
+  if (name === "get_place_details" && (typeof args.place_id !== "string" || args.place_id.length > 200)) {
+    throw new HttpError(400, "place_id is required", "INVALID_ARGUMENT");
   }
   if (name === "get_route_matrix") {
     if (!Array.isArray(args.origins) || !Array.isArray(args.destinations) ||
-        !args.origins.length || !args.destinations.length) {
-      throw new HttpError(400, "origins and destinations must be non-empty arrays", "INVALID_ARGUMENT");
+        !args.origins.length || !args.destinations.length ||
+        args.origins.length > 10 || args.destinations.length > 10 ||
+        args.origins.some((v: unknown) => typeof v !== "string" || !v.trim()) ||
+        args.destinations.some((v: unknown) => typeof v !== "string" || !v.trim())) {
+      throw new HttpError(400, "origins and destinations must each contain 1 to 10 non-empty addresses", "INVALID_ARGUMENT");
     }
   }
-  if (name === "get_route" && (!args.origin || !args.destination)) {
-    throw new HttpError(400, "origin and destination are required", "INVALID_ARGUMENT");
+  if (name === "get_route" && (
+    typeof args.origin !== "string" || !args.origin.trim() ||
+    typeof args.destination !== "string" || !args.destination.trim()
+  )) {
+    throw new HttpError(400, "origin and destination are required addresses", "INVALID_ARGUMENT");
+  }
+  if (name === "geocode_location" && !args.address &&
+      !(Number.isFinite(args.latitude) && Number.isFinite(args.longitude))) {
+    throw new HttpError(400, "Provide an address or both coordinates", "INVALID_ARGUMENT");
   }
 }
 
