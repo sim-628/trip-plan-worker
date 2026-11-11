@@ -156,7 +156,7 @@ export function relayCreatedSession(
             const event = eventPayload(frame);
             if (!event?.type) continue;
             if (event.type === "agent.session.created") {
-              sessionId = event.data?.id || event.session_id || sessionId;
+              sessionId = event.session?.id || event.data?.id || event.session_id || sessionId;
             }
             if ((event.type === "agent.session.requires_action" ||
                  event.type === "agent.session.action_required") && sessionId) {
