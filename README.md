@@ -6,7 +6,8 @@ A Cloudflare Worker that exposes selected Google Maps Platform capabilities as a
 
 - One Cloudflare Worker; no Durable Objects or database required.
 - Seven tools: `search_places`, `search_nearby_places`, `search_restaurants`, `get_place_details`, `get_route`, `get_route_matrix`, and `geocode_location`.
-- Responses API-style OpenAI function schemas at `GET /openai/tools`.
+- Responses-style OpenAI function schemas at `GET /openai/tools`.
+- Managed OpenAI Agents API session gateway with streamed first turns, follow-up messages, and automatic Google function dispatch.
 - Authenticated execution endpoint at `POST /tools/execute`.
 - Google Places API (New), Routes API and Geocoding API adapters.
 - Field masks, basic input validation, consistent JSON errors and secret-based credentials.
@@ -25,6 +26,7 @@ npm install
 npx wrangler login
 npx wrangler secret put GOOGLE_MAPS_API_KEY
 npx wrangler secret put APP_API_TOKEN
+npx wrangler secret put OPENAI_API_KEY
 npm run dev
 ```
 
@@ -53,6 +55,9 @@ Authorization: Bearer <APP_API_TOKEN>
 | GET | `/openai/tools` | OpenAI function tool definitions |
 | GET | `/tools` | Available tool names |
 | POST | `/tools/execute` | Execute one tool |
+| POST | `/agent/sessions` | Create managed Agent session and stream first turn |
+| POST | `/agent/sessions/{session_id}/messages` | Continue a managed session |
+| GET | `/agent/sessions/{session_id}` | Retrieve session state |
 
 Example:
 
@@ -75,7 +80,7 @@ curl -X POST "$WORKER_URL/tools/execute" \
   }'
 ```
 
-See [OpenAI integration](docs/openai-integration.md) for tool registration and function-call execution, and [Apple MapKit boundary](docs/apple-mapkit-boundary.md) for provider display restrictions.
+See [OpenAI Agents API integration](docs/agents-api-integration.md) for managed sessions and automatic function-call execution, and [legacy tool integration](docs/openai-integration.md) for direct dispatcher use, and [Apple MapKit boundary](docs/apple-mapkit-boundary.md) for provider display restrictions.
 
 ## Important Google Maps Platform terms
 
@@ -88,5 +93,5 @@ This project intentionally does not persist Google Maps Content. Place IDs and u
 - `search_restaurants` applies rating, review-count and price filtering after the Places text search response. These are application-side filters, not all native Google search filters.
 - Restaurant quality scoring is not implemented; Google ratings are signals, not a guarantee of quality.
 - `get_route` and `get_route_matrix` return Google Routes data. Do not use their geometry or route content as Apple MapKit overlays.
-- The Worker does not manage OpenAI Agent sessions. Your trusted backend receives function calls, invokes `/tools/execute`, and returns each result using the relevant OpenAI protocol.
+- The Worker can create and continue managed OpenAI Agent sessions, stream events, and dispatch pending Google function calls. Store session IDs in your application data store and scope them to the authenticated user.
 - No Durable Objects are included. Add them only if you later need per-trip coordination, WebSockets, or shared concurrent state.
