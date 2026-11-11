@@ -29,6 +29,9 @@ All endpoints except GET /health require Authorization: Bearer APP_API_TOKEN.
 | POST | /agent/sessions/{session_id}/messages | Continue an existing session and stream events |
 | GET | /agent/sessions/{session_id} | Retrieve session state, including pending required_actions |
 | GET | /agent/sessions/{session_id}/events | Reconnect to the live event stream and dispatch any newly observed function calls |
+| GET, POST | /agents/* | Transparent proxy to `https://api.openai.com/v1/agents/*` for the saved agent. Accepts `IOS_GATEWAY_TOKEN` or `APP_API_TOKEN`. Does not execute function calls. |
+
+`/agent/sessions` creates an inline agent and runs function calls inside the Worker. The iOS app uses `/agents/*` so the session stays on the saved agent and local card tools return to the phone.
 
 ### Create a session
 

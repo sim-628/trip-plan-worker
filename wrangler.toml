@@ -13,5 +13,6 @@ DIDA_ACCEPT_LANGUAGE = "en"
 # Configure secrets with:
 # npx wrangler secret put GOOGLE_MAPS_API_KEY
 # npx wrangler secret put APP_API_TOKEN
+# npx wrangler secret put IOS_GATEWAY_TOKEN
 # npx wrangler secret put OPENAI_API_KEY
 # npx wrangler secret put DIDA_API_TOKEN

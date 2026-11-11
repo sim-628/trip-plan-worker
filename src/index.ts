@@ -21,6 +21,135 @@ function json(data: unknown, status = 200, origin = "*") {
   });
 }
 
+async function openaiJSONFirst(env: Env, paths: string[]): Promise<any> {
+  let last: HttpError | null = null;
+  for (const path of paths) {
+    try {
+      return await openaiJSON(env, path);
+    } catch (error) {
+      if (error instanceof HttpError && (error.status === 404 || error.status === 405)) {
+        last = error;
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw last ?? new HttpError(404, "OpenAI resource was not found", "OPENAI_API_ERROR");
+}
+
+async function openaiJSON(env: Env, path: string): Promise<any> {
+  const response = await fetch("https://api.openai.com/v1" + path, {
+    headers: {
+      Authorization: "Bearer " + env.OPENAI_API_KEY,
+      "OpenAI-Beta": "agents=v1",
+      Accept: "application/json",
+      "User-Agent": "TripPlan/1 CFNetwork",
+    },
+  });
+  const raw = await response.text();
+  if (!response.ok) {
+    throw new HttpError(response.status >= 500 ? 502 : response.status, raw.slice(0, 500) || "OpenAI request failed", "OPENAI_API_ERROR");
+  }
+  return raw ? JSON.parse(raw) : {};
+}
+
+async function withVaults(env: Env, bodyBytes: ArrayBuffer): Promise<Uint8Array> {
+  const original = new Uint8Array(bodyBytes);
+  let body: any;
+  try {
+    body = JSON.parse(new TextDecoder().decode(original));
+  } catch {
+    return original;
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) return original;
+  if (Array.isArray(body.vault_ids) && body.vault_ids.length > 0) return original;
+
+  const needed = new Set<string>();
+  const tools = Array.isArray(body.agent?.tools) ? body.agent.tools : [];
+  for (const tool of tools) {
+    if (typeof tool?.credential_id === "string") needed.add(tool.credential_id);
+  }
+  if (needed.size === 0 && typeof body.agent_id !== "string") return original;
+  if (typeof body.agent_id === "string") {
+    const agent = await openaiJSON(env, "/agents/" + encodeURIComponent(body.agent_id));
+    for (const tool of agent?.tools ?? []) {
+      if (typeof tool?.credential_id === "string") needed.add(tool.credential_id);
+    }
+  }
+  if (needed.size === 0) return original;
+
+  const listed = await openaiJSONFirst(env, ["/vaults?limit=100", "/agents/vaults?limit=100"]);
+  const vaults = Array.isArray(listed?.data) ? listed.data : [];
+  const matched: string[] = [];
+  for (const vault of vaults) {
+    if (typeof vault?.id !== "string") continue;
+    const credentials = await openaiJSONFirst(env, [
+      "/vaults/" + encodeURIComponent(vault.id) + "/credentials?limit=100",
+      "/agents/vaults/" + encodeURIComponent(vault.id) + "/credentials?limit=100",
+    ]);
+    const rows = Array.isArray(credentials?.data) ? credentials.data : [];
+    if (rows.some((row: any) => typeof row?.id === "string" && needed.has(row.id))) {
+      matched.push(vault.id);
+    }
+  }
+  if (matched.length === 0) return original;
+  body.vault_ids = matched;
+  return new TextEncoder().encode(JSON.stringify(body));
+}
+
+function bearerMatches(request: Request, ...tokens: Array<string | undefined>): boolean {
+  const header = request.headers.get("Authorization");
+  return tokens.some((token) => Boolean(token) && header === `Bearer ${token}`);
+}
+
+async function proxySavedAgent(request: Request, env: Env, url: URL, origin: string): Promise<Response> {
+  if (!env.OPENAI_API_KEY) {
+    throw new HttpError(503, "OPENAI_API_KEY is not configured", "OPENAI_NOT_CONFIGURED");
+  }
+  if (!env.IOS_GATEWAY_TOKEN && !env.APP_API_TOKEN) {
+    throw new HttpError(503, "IOS_GATEWAY_TOKEN is not configured", "SERVER_NOT_CONFIGURED");
+  }
+  if (!bearerMatches(request, env.IOS_GATEWAY_TOKEN, env.APP_API_TOKEN)) {
+    throw new HttpError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  if (request.method !== "GET" && request.method !== "POST") {
+    throw new HttpError(405, "Method not allowed", "METHOD_NOT_ALLOWED");
+  }
+
+  const headers = new Headers();
+  headers.set("Authorization", "Bearer " + env.OPENAI_API_KEY);
+  headers.set("OpenAI-Beta", "agents=v1");
+  headers.set("User-Agent", "TripPlan/1 CFNetwork");
+  const accept = request.headers.get("Accept");
+  if (accept) headers.set("Accept", accept);
+  const contentType = request.headers.get("Content-Type");
+  if (contentType) headers.set("Content-Type", contentType);
+  const idempotencyKey = request.headers.get("Idempotency-Key");
+  if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);
+
+  let body: Uint8Array | undefined;
+  if (request.method !== "GET") {
+    const incoming = await request.arrayBuffer();
+    body = url.pathname === "/agents/sessions" ? await withVaults(env, incoming) : new Uint8Array(incoming);
+    if (url.pathname === "/agents/sessions") {
+      headers.set("Content-Type", "application/json");
+    }
+  }
+
+  const upstream = await fetch("https://api.openai.com/v1" + url.pathname + url.search, {
+    method: request.method,
+    headers,
+    body: body as BodyInit | undefined,
+  });
+  const responseHeaders = new Headers();
+  const contentTypeOut = upstream.headers.get("Content-Type");
+  if (contentTypeOut) responseHeaders.set("Content-Type", contentTypeOut);
+  responseHeaders.set("Cache-Control", "no-cache, no-transform");
+  responseHeaders.set("Access-Control-Allow-Origin", origin);
+  responseHeaders.set("X-Accel-Buffering", "no");
+  return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
+}
+
 function validateArgs(value: unknown): Record<string, any> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new HttpError(400, "Tool arguments must be a JSON object", "INVALID_ARGUMENT");
@@ -104,6 +233,10 @@ export default {
     try {
       if (url.pathname === "/health" && request.method === "GET") {
         return json({ ok: true, service: "trip-plan-worker" }, 200, origin);
+      }
+
+      if (url.pathname === "/agents" || url.pathname.startsWith("/agents/")) {
+        return proxySavedAgent(request, env, url, origin);
       }
 
       if (!env.APP_API_TOKEN) {
