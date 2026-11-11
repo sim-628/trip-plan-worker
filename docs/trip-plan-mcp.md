@@ -54,7 +54,7 @@ This is a shared service credential for server-to-server access. It is not per-u
 | \`get_route_matrix\` | Multi-origin/destination route matrix |
 | \`geocode_location\` | Forward and reverse geocoding |
 
-### DidaTicket (8 tools)
+### DidaTicket (10 tools)
 
 | Tool | Purpose |
 |---|---|
@@ -132,7 +132,7 @@ Use MCP Inspector:
 npx @modelcontextprotocol/inspector@latest
 \`\`\`
 
-Connect to the Worker URL and set the Authorization header. Run List Tools and verify all 15 tools appear. Test a read-only tool first, such as \`ticket_search_products\` with a small page size.
+Connect to the Worker URL and set the Authorization header. Run List Tools and verify all 17 tools appear. Test `ticket_health_check` and `ticket_search_products` with a small page size. Test a read-only tool first, such as \`ticket_search_products\` with a small page size.
 
 The \`/mcp\` endpoint speaks MCP JSON-RPC; opening it directly in a browser is not a valid test.
 
