@@ -1,6 +1,8 @@
 import { Env, HttpError } from "./types";
 import { OPENAI_TOOLS } from "./tools/definitions";
 import { executeTool, TOOL_NAMES } from "./tools/dispatcher";
+import { startSessionStream, continueSessionStream } from "./agent/runtime";
+import { retrieveSession } from "./agent/openai";
 
 function json(data: unknown, status = 200, origin = "*") {
   return new Response(JSON.stringify(data), {
@@ -10,7 +12,7 @@ function json(data: unknown, status = 200, origin = "*") {
       "Cache-Control": "no-store",
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Authorization,Content-Type",
+      "Access-Control-Allow-Headers": "Authorization,Content-Type,Idempotency-Key",
       "Vary": "Origin",
     },
   });
@@ -123,6 +125,57 @@ export default {
         validateToolInput(body.name, args);
         const output = await executeTool(body.name, args, env);
         return json({ ok: true, name: body.name, output }, 200, origin);
+      }
+
+      if (url.pathname === "/agent/sessions" && request.method === "POST") {
+        const body = await request.json() as { input?: string; model?: string; instructions?: string };
+        if (typeof body.input !== "string" || !body.input.trim() || body.input.length > 20000) {
+          throw new HttpError(400, "input must be a non-empty string (max 20,000 characters)", "INVALID_ARGUMENT");
+        }
+        const upstream = await startSessionStream(
+          env,
+          body.input,
+          body.model || env.AGENT_MODEL || "gpt-5.4",
+          body.instructions || env.AGENT_INSTRUCTIONS || "You are a travel planning assistant. Use the available Google Maps tools to discover places, restaurants and routes. Never claim a booking has been made unless a booking provider confirms it.",
+        );
+        return new Response(upstream.body, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Headers": "Authorization,Content-Type,Idempotency-Key",
+            "X-Accel-Buffering": "no",
+          },
+        });
+      }
+
+      const messageMatch = url.pathname.match(/^\\/agent\\/sessions\\/([^/]+)\\/messages$/);
+      if (messageMatch && request.method === "POST") {
+        const body = await request.json() as { message?: string };
+        if (typeof body.message !== "string" || !body.message.trim() || body.message.length > 20000) {
+          throw new HttpError(400, "message must be a non-empty string (max 20,000 characters)", "INVALID_ARGUMENT");
+        }
+        const idempotencyKey = request.headers.get("Idempotency-Key") || crypto.randomUUID();
+        const stream = await continueSessionStream(
+          env, decodeURIComponent(messageMatch[1]), body.message, idempotencyKey,
+        );
+        return new Response(stream, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Headers": "Authorization,Content-Type,Idempotency-Key",
+            "X-Accel-Buffering": "no",
+          },
+        });
+      }
+
+      const sessionMatch = url.pathname.match(/^\\/agent\\/sessions\\/([^/]+)$/);
+      if (sessionMatch && request.method === "GET") {
+        const session = await retrieveSession(env, decodeURIComponent(sessionMatch[1]));
+        return json(session, 200, origin);
       }
 
       return json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404, origin);
