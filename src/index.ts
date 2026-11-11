@@ -115,7 +115,7 @@ export default {
 
       if (url.pathname === "/mcp") {
         const handler = createMcpHandler(
-          () => createGoogleMapsMcpServer(env),
+          () => createTripPlanMcpServer(env),
           { route: "/mcp", legacy: "stateless", responseMode: "auto" },
         );
         return handler(request, env, ctx);
