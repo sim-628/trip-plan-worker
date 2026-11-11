@@ -159,6 +159,14 @@ export function createTripPlanMcpServer(env: Env) {
   registerTool(
     server,
     env,
+    "ticket_health_check",
+    "Check DidaTicket API authentication and return the current channel context, currency and distribution status. This is a diagnostic read-only call.",
+    {},
+  );
+
+  registerTool(
+    server,
+    env,
     "ticket_list_countries",
     "List countries available in the DidaTicket rollinggo distribution catalogue. Use the returned country_code when filtering cities or ticket products.",
     {},
@@ -171,7 +179,7 @@ export function createTripPlanMcpServer(env: Env) {
     "List ticket destinations/cities available to the channel, optionally filtered by country codes returned by ticket_list_countries.",
     {
       country_codes: z.array(z.string().min(1)).max(50).optional(),
-      language: z.enum(["en", "zh-CN"]).optional(),
+      language: z.enum(["en", "zh-CN", "ru"]).optional(),
     },
   );
 
@@ -196,7 +204,7 @@ export function createTripPlanMcpServer(env: Env) {
       category_codes: z.array(z.string().min(1)).max(50).optional(),
       page: z.number().int().min(1).default(1),
       limit: z.number().int().min(1).max(50).default(20),
-      language: z.enum(["en", "zh-CN"]).optional(),
+      language: z.enum(["en", "zh-CN", "ru"]).optional(),
     },
   );
 
@@ -210,7 +218,7 @@ export function createTripPlanMcpServer(env: Env) {
       catalog_changes: z.boolean().optional(),
       changed_since: z.string().optional(),
       changed_until: z.string().optional(),
-      language: z.enum(["en", "zh-CN"]).optional(),
+      language: z.enum(["en", "zh-CN", "ru"]).optional(),
     },
   );
 
@@ -223,7 +231,7 @@ export function createTripPlanMcpServer(env: Env) {
       sku_codes: z.array(z.string().min(1)).min(1).max(20),
       start_date: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
       end_date: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
-      language: z.enum(["en", "zh-CN"]).default("en"),
+      language: z.enum(["en", "zh-CN", "ru"]).default("en"),
     },
   );
 
@@ -234,7 +242,7 @@ export function createTripPlanMcpServer(env: Env) {
     "Get package-specific booking requirements and additional information before checking availability or validating an order. Use package codes from ticket_get_product_details.",
     {
       package_codes: z.array(z.string().min(1)).min(1).max(50),
-      language: z.enum(["en", "zh-CN"]).default("en"),
+      language: z.enum(["en", "zh-CN", "ru"]).default("en"),
     },
   );
 
@@ -253,7 +261,38 @@ export function createTripPlanMcpServer(env: Env) {
           price: z.string().optional(),
         })).min(1),
       })).min(1).max(20),
-      language: z.enum(["en", "zh-CN"]).default("en"),
+      language: z.enum(["en", "zh-CN", "ru"]).default("en"),
+    },
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_validate_order",
+    "Validate a proposed ticket order and retrieve the current quote without creating an order or charging credit. Call only after product details, package extra-info, SKU calendar and live availability have been checked. contact_info must use first_name, family_name and mobile; do not use product contact rule keys such as name_english as JSON property names.",
+    {
+      agent_order_code: z.string().min(1).max(64),
+      timestamp: z.number().int().optional(),
+      contact_info: z.object({
+        title: z.string().optional(),
+        first_name: z.string().min(1),
+        family_name: z.string().min(1),
+        mobile: z.string().min(1).describe("Use country-code-number, e.g. 86-13800000000; no plus sign or leading zero in the national number."),
+        email: z.string().email().optional(),
+        country: z.string().length(2).optional(),
+      }),
+      items: z.array(z.object({
+        package_code: z.string().min(1),
+        start_time: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
+        sku_list: z.array(z.object({
+          sku_code: z.string().min(1),
+          count: z.number().int().min(1),
+          acceptable_price: z.string().optional(),
+          booking_extra_info: z.array(z.record(z.string(), z.unknown())).optional(),
+          unit_extra_info: z.array(z.record(z.string(), z.unknown())).optional(),
+        })).min(1),
+      })).min(1).max(20),
+      language: z.enum(["en", "zh-CN", "ru"]).default("en"),
     },
   );
 
