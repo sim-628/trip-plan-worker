@@ -110,6 +110,7 @@ Add an MCP server to the saved Agent:
     "get_route",
     "get_route_matrix",
     "geocode_location",
+    "ticket_health_check",
     "ticket_list_countries",
     "ticket_list_cities",
     "ticket_list_categories",
@@ -117,7 +118,8 @@ Add an MCP server to the saved Agent:
     "ticket_get_product_details",
     "ticket_get_sku_calendar",
     "ticket_get_package_extra_info",
-    "ticket_check_availability"
+    "ticket_check_availability",
+    "ticket_validate_order"
   ]
 }
 \`\`\`
