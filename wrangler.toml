@@ -7,6 +7,8 @@ compatibility_flags = ["nodejs_compat"]
 APP_ENV = "production"
 # Set ALLOWED_ORIGIN to your app's API origin if browser clients will call this Worker.
 ALLOWED_ORIGIN = "*"
+DIDA_API_BASE_URL = "https://didatickettest.wysiwysi.com/api/distribution/v1"
+DIDA_ACCEPT_LANGUAGE = "en"
 
 # Configure secrets with:
 # npx wrangler secret put GOOGLE_MAPS_API_KEY
