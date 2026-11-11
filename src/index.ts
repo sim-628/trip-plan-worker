@@ -4,6 +4,8 @@ import { executeTool, TOOL_NAMES } from "./tools/dispatcher";
 import { startSessionStream, continueSessionStream, relayCreatedSession, relayAndExecute } from "./agent/runtime";
 import { openEventStream } from "./agent/openai";
 import { retrieveSession } from "./agent/openai";
+import { createMcpHandler } from "agents/mcp/server";
+import { createGoogleMapsMcpServer } from "./mcp/google-server";
 
 function json(data: unknown, status = 200, origin = "*") {
   return new Response(JSON.stringify(data), {
@@ -86,7 +88,7 @@ function validateToolInput(name: string, args: Record<string, any>) {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const origin = env.ALLOWED_ORIGIN ?? "*";
     if (request.method === "OPTIONS") return new Response(null, {
       status: 204,
@@ -109,6 +111,14 @@ export default {
       }
       if (request.headers.get("Authorization") !== `Bearer ${env.APP_API_TOKEN}`) {
         throw new HttpError(401, "Unauthorized", "UNAUTHORIZED");
+      }
+
+      if (url.pathname === "/mcp") {
+        const handler = createMcpHandler(
+          () => createGoogleMapsMcpServer(env),
+          { route: "/mcp", legacy: "stateless", responseMode: "auto" },
+        );
+        return handler(request, env, ctx);
       }
 
       if (url.pathname === "/openai/tools" && request.method === "GET") {
