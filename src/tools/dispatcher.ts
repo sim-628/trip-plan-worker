@@ -2,10 +2,23 @@ import { Env, HttpError } from "../types";
 import { searchText, searchNearby, searchRestaurants, getPlaceDetails } from "../google/places";
 import { getRoute, getRouteMatrix } from "../google/routes";
 import { geocodeLocation } from "../google/geocoding";
+import {
+  ticketListCountries,
+  ticketListCities,
+  ticketListCategories,
+  ticketSearchProducts,
+  ticketGetProductDetails,
+  ticketGetSkuCalendar,
+  ticketGetPackageExtraInfo,
+  ticketCheckAvailability,
+} from "../ticket/client";
 
 export const TOOL_NAMES = [
   "search_places", "search_nearby_places", "search_restaurants",
   "get_place_details", "get_route", "get_route_matrix", "geocode_location",
+  "ticket_list_countries", "ticket_list_cities", "ticket_list_categories",
+  "ticket_search_products", "ticket_get_product_details", "ticket_get_sku_calendar",
+  "ticket_get_package_extra_info", "ticket_check_availability",
 ] as const;
 
 export type ToolName = typeof TOOL_NAMES[number];
@@ -19,6 +32,14 @@ export async function executeTool(name: string, args: Record<string, any>, env: 
     case "get_route": return getRoute(env, args);
     case "get_route_matrix": return getRouteMatrix(env, args);
     case "geocode_location": return geocodeLocation(env, args);
+    case "ticket_list_countries": return ticketListCountries(env);
+    case "ticket_list_cities": return ticketListCities(env, args);
+    case "ticket_list_categories": return ticketListCategories(env);
+    case "ticket_search_products": return ticketSearchProducts(env, args);
+    case "ticket_get_product_details": return ticketGetProductDetails(env, args);
+    case "ticket_get_sku_calendar": return ticketGetSkuCalendar(env, args);
+    case "ticket_get_package_extra_info": return ticketGetPackageExtraInfo(env, args);
+    case "ticket_check_availability": return ticketCheckAvailability(env, args);
     default: throw new HttpError(404, `Unknown tool: ${name}`, "UNKNOWN_TOOL");
   }
 }
