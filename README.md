@@ -6,7 +6,8 @@ A Cloudflare Worker that exposes selected Google Maps Platform capabilities as a
 
 - One Cloudflare Worker; no Durable Objects or database required.
 - Seven tools: `search_places`, `search_nearby_places`, `search_restaurants`, `get_place_details`, `get_route`, `get_route_matrix`, and `geocode_location`.
-- Responses-style OpenAI function schemas at `GET /openai/tools`.
+- A stateless Streamable HTTP MCP endpoint at `/mcp` exposing the seven Google Maps tools.
+- Responses-style OpenAI function schemas at `GET /openai/tools` for legacy direct Function Calling.
 - Managed OpenAI Agents API session gateway with streamed first turns, follow-up messages, and automatic Google function dispatch.
 - Authenticated execution endpoint at `POST /tools/execute`.
 - Google Places API (New), Routes API and Geocoding API adapters.
@@ -52,7 +53,8 @@ Authorization: Bearer <APP_API_TOKEN>
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/health` | Health check |
-| GET | `/openai/tools` | OpenAI function tool definitions |
+| POST | `/mcp` | Stateless Google Maps MCP server (Streamable HTTP) |
+| GET | `/openai/tools` | OpenAI function tool definitions (legacy direct Function Calling) |
 | GET | `/tools` | Available tool names |
 | POST | `/tools/execute` | Execute one tool |
 | POST | `/agent/sessions` | Create managed Agent session and stream first turn |
@@ -82,7 +84,7 @@ curl -X POST "$WORKER_URL/tools/execute" \
   }'
 ```
 
-See [OpenAI Agents API integration](docs/agents-api-integration.md) for managed sessions and automatic function-call execution, and [legacy tool integration](docs/openai-integration.md) for direct dispatcher use, and [Apple MapKit boundary](docs/apple-mapkit-boundary.md) for provider display restrictions.
+Connect `https://<your-worker>.workers.dev/mcp` to OpenAI as a remote MCP server and provide `Authorization: Bearer <APP_API_TOKEN>` using a Vault credential or per-session MCP transport authorization. See [Google Maps MCP setup](docs/google-maps-mcp.md). For Agent session integration, see [OpenAI Agents API integration](docs/agents-api-integration.md) for managed sessions and automatic function-call execution, and [legacy tool integration](docs/openai-integration.md) for direct dispatcher use, and [Apple MapKit boundary](docs/apple-mapkit-boundary.md) for provider display restrictions.
 
 ## Important Google Maps Platform terms
 
