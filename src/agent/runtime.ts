@@ -73,7 +73,7 @@ export function relayAndExecute(
           const part = await reader.read();
           if (part.done) break;
           controller.enqueue(part.value);
-          pending += decoder.decode(part.value, { stream: true }).replace(/\r\n/g, "\n");
+          pending = (pending + decoder.decode(part.value, { stream: true })).replace(/\r\n/g, "\n");
           let splitAt: number;
           while ((splitAt = pending.indexOf("\n\n")) >= 0) {
             const frame = pending.slice(0, splitAt);
@@ -150,7 +150,7 @@ export function relayCreatedSession(
           const part = await reader.read();
           if (part.done) break;
           controller.enqueue(part.value);
-          pending += decoder.decode(part.value, { stream: true }).replace(/\r\n/g, "\n");
+          pending = (pending + decoder.decode(part.value, { stream: true })).replace(/\r\n/g, "\n");
           let splitAt: number;
           while ((splitAt = pending.indexOf("\n\n")) >= 0) {
             const frame = pending.slice(0, splitAt);
