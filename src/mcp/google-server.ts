@@ -156,5 +156,106 @@ export function createGoogleMapsMcpServer(env: Env) {
     },
   );
 
+  registerTool(
+    server,
+    env,
+    "ticket_list_countries",
+    "List countries available in the DidaTicket rollinggo distribution catalogue. Use the returned country_code when filtering cities or ticket products.",
+    {},
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_list_cities",
+    "List ticket destinations/cities available to the channel, optionally filtered by country codes returned by ticket_list_countries.",
+    {
+      country_codes: z.array(z.string().min(1)).max(50).optional(),
+      language: z.enum(["en", "zh-CN"]).optional(),
+    },
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_list_categories",
+    "List ticket product categories and subcategories available to the channel. Use category codes when searching ticket products.",
+    {},
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_search_products",
+    "Search the DidaTicket product catalogue by keyword, destination, country, category or exact product code. Returns product-level summary and starting price; use ticket_get_product_details and ticket_get_sku_calendar for package, SKU, date-specific prices and inventory.",
+    {
+      keyword: z.string().max(200).optional(),
+      product_code: z.string().max(100).optional(),
+      city_codes: z.array(z.string().min(1)).max(50).optional(),
+      country_codes: z.array(z.string().min(1)).max(50).optional(),
+      category_codes: z.array(z.string().min(1)).max(50).optional(),
+      page: z.number().int().min(1).default(1),
+      limit: z.number().int().min(1).max(50).default(20),
+      language: z.enum(["en", "zh-CN"]).optional(),
+    },
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_get_product_details",
+    "Get a ticket product's description, packages, SKU codes, ticket types, age and party rules, cancellation rules and required contact fields. Product-level price is only indicative; use ticket_get_sku_calendar for date-specific price and inventory.",
+    {
+      product_code: z.string().min(1).max(100),
+      catalog_changes: z.boolean().optional(),
+      changed_since: z.string().optional(),
+      changed_until: z.string().optional(),
+      language: z.enum(["en", "zh-CN"]).optional(),
+    },
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_get_sku_calendar",
+    "Get date-specific selling prices, inventory and cutoff times for 1 to 20 Dida SKU codes over a destination-local date range no longer than 90 days. Use SKU codes from ticket_get_product_details. Dates must be yyyy-MM-dd HH:mm:ss.",
+    {
+      sku_codes: z.array(z.string().min(1)).min(1).max(20),
+      start_date: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
+      end_date: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
+      language: z.enum(["en", "zh-CN"]).default("en"),
+    },
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_get_package_extra_info",
+    "Get package-specific booking requirements and additional information before checking availability or validating an order. Use package codes from ticket_get_product_details.",
+    {
+      package_codes: z.array(z.string().min(1)).min(1).max(50),
+      language: z.enum(["en", "zh-CN"]).default("en"),
+    },
+  );
+
+  registerTool(
+    server,
+    env,
+    "ticket_check_availability",
+    "Perform a live ticket availability and price check before any order is created. The package_lines array must include package_code, destination-local start_time (yyyy-MM-dd HH:mm:ss), and sku_list with sku_code and count. This tool does not create or pay for an order.",
+    {
+      package_lines: z.array(z.object({
+        package_code: z.string().min(1),
+        start_time: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
+        sku_list: z.array(z.object({
+          sku_code: z.string().min(1),
+          count: z.number().int().min(1),
+          price: z.string().optional(),
+        })).min(1),
+      })).min(1).max(20),
+      language: z.enum(["en", "zh-CN"]).default("en"),
+    },
+  );
+
   return server;
 }
