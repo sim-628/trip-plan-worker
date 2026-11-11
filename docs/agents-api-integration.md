@@ -1,3 +1,5 @@
+> **Preferred integration for new Agents:** use the stateless remote MCP endpoint documented in [Trip Plan MCP](trip-plan-mcp.md). The manual Function Calling flow below is retained for compatibility and direct backend orchestration; do not register the same Google tools through both MCP and Function Calling in one Agent, or the model may see duplicate tools.
+
 # Managed OpenAI Agents API integration
 
 The Worker now exposes a thin managed Agents API gateway and automatically dispatches Google function calls.
