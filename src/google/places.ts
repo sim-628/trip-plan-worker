@@ -10,6 +10,7 @@ const SEARCH_FIELDS = [
   "places.types",
   "places.rating",
   "places.userRatingCount",
+  "places.priceLevel",
   "nextPageToken",
 ].join(",");
 
