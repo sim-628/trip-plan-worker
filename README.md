@@ -5,7 +5,7 @@ A Cloudflare Worker that exposes selected Google Maps Platform capabilities as a
 ## Included
 
 - One Cloudflare Worker; no Durable Objects or database required.
-- Fifteen stateless MCP tools: seven Google Maps tools and eight DidaTicket supply tools.
+- Seventeen stateless MCP tools: seven Google Maps tools and ten DidaTicket supply/validation tools.
 - A stateless Streamable HTTP MCP endpoint at `/mcp` exposing the seven Google Maps tools.
 - Responses-style OpenAI function schemas at `GET /openai/tools` for legacy direct Function Calling.
 - Managed OpenAI Agents API session gateway with streamed first turns, follow-up messages, and automatic Google function dispatch.
