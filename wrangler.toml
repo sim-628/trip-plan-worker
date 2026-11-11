@@ -10,3 +10,4 @@ ALLOWED_ORIGIN = "*"
 # Configure secrets with:
 # npx wrangler secret put GOOGLE_MAPS_API_KEY
 # npx wrangler secret put APP_API_TOKEN
+# npx wrangler secret put OPENAI_API_KEY
