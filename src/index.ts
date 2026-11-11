@@ -88,7 +88,7 @@ function validateToolInput(name: string, args: Record<string, any>) {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: any): Promise<Response> {
     const origin = env.ALLOWED_ORIGIN ?? "*";
     if (request.method === "OPTIONS") return new Response(null, {
       status: 204,
