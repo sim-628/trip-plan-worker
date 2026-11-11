@@ -101,7 +101,10 @@ export async function getPlaceDetails(env: Env, args: Record<string, any>) {
   if (!/^[A-Za-z0-9_-]+$/.test(placeId)) {
     throw new HttpError(400, "Invalid place_id", "INVALID_ARGUMENT");
   }
-  return googleJson(env, placesUrl(`/places/${encodeURIComponent(placeId)}`), {
+  const query = args.language_code
+    ? `?languageCode=${encodeURIComponent(args.language_code)}`
+    : "";
+  return googleJson(env, placesUrl(`/places/${encodeURIComponent(placeId)}${query}`), {
     method: "GET",
     headers: { "X-Goog-FieldMask": DETAIL_FIELDS },
   });
