@@ -93,7 +93,7 @@ export default {
       headers: {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-        "Access-Control-Allow-Headers": "Authorization,Content-Type",
+        "Access-Control-Allow-Headers": "Authorization,Content-Type,Idempotency-Key",
         "Access-Control-Max-Age": "86400",
       },
     });
@@ -151,7 +151,7 @@ export default {
         });
       }
 
-      const messageMatch = url.pathname.match(/^\\/agent\\/sessions\\/([^/]+)\\/messages$/);
+      const messageMatch = url.pathname.match(/^\/agent\/sessions\/([^/]+)\/messages$/);
       if (messageMatch && request.method === "POST") {
         const body = await request.json() as { message?: string };
         if (typeof body.message !== "string" || !body.message.trim() || body.message.length > 20000) {
@@ -173,7 +173,7 @@ export default {
         });
       }
 
-      const eventStreamMatch = url.pathname.match(/^\\/agent\\/sessions\\/([^/]+)\\/events$/);
+      const eventStreamMatch = url.pathname.match(/^\/agent\/sessions\/([^/]+)\/events$/);
       if (eventStreamMatch && request.method === "GET") {
         const sessionId = decodeURIComponent(eventStreamMatch[1]);
         const stream = await openEventStream(env, sessionId);
@@ -189,7 +189,7 @@ export default {
         });
       }
 
-      const sessionMatch = url.pathname.match(/^\\/agent\\/sessions\\/([^/]+)$/);
+      const sessionMatch = url.pathname.match(/^\/agent\/sessions\/([^/]+)$/);
       if (sessionMatch && request.method === "GET") {
         const session = await retrieveSession(env, decodeURIComponent(sessionMatch[1]));
         return json(session, 200, origin);
