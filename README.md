@@ -15,7 +15,8 @@ A Cloudflare Worker that exposes selected Google Maps Platform capabilities as a
 
 ## Included
 
-- One Cloudflare Worker; no Durable Objects or database required.
+- One Cloudflare Worker, with a Durable Object coordinator for the new travel sessions and seven specialist Agents.
+- A private browser test interface at `/test/`, with chat history and itinerary tables stored in the current browser.
 - Seventeen stateless MCP tools: seven Google Maps tools and ten DidaTicket supply/validation tools.
 - A stateless Streamable HTTP MCP endpoint at `/mcp` exposing the seven Google Maps tools.
 - Responses-style OpenAI function schemas at `GET /openai/tools` for legacy direct Function Calling.
@@ -57,7 +58,7 @@ Set `ALLOWED_ORIGIN` in `wrangler.toml` to your application backend origin if br
 
 ## HTTP API
 
-All endpoints except `GET /health` require:
+The legacy tool endpoints below require the following header. The public `/health` check and `/test/` page are exceptions; `/test/api/` uses a private signed login cookie, while the new travel API additionally scopes requests to individual sessions (see the linked guides above).
 
 ```http
 Authorization: Bearer <APP_API_TOKEN>
@@ -111,4 +112,4 @@ This project intentionally does not persist Google Maps Content. Place IDs and u
 - Restaurant quality scoring is not implemented; Google ratings are signals, not a guarantee of quality.
 - `get_route` and `get_route_matrix` return Google Routes data. Do not use their geometry or route content as Apple MapKit overlays.
 - The Worker can create and continue managed OpenAI Agent sessions, stream events, and dispatch pending Google function calls. It also exposes a separate stateless MCP endpoint for Google Maps and DidaTicket supply tools. Store session IDs in your application data store and scope them to the authenticated user.
-- No Durable Objects are included. Add them only if you later need per-trip coordination, WebSockets, or shared concurrent state.
+- New travel sessions use `TravelSessionCoordinator` Durable Objects to continue specialist work and reconcile client tool results across browser reconnects.
