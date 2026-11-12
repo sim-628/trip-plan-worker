@@ -115,3 +115,37 @@ export async function readBody(request: Request) {
     throw new HttpError(400, "Invalid JSON", "INVALID_JSON");
   }
 }
+
+/** A response can be lost after OpenAI has accepted a result. Reconcile instead of
+ * reporting that successful query as failed or submitting a second effect. */
+export async function deliverEvent(
+  env: Env,
+  sessionId: string,
+  event: any,
+  key: string,
+) {
+  try {
+    return await api(
+      env,
+      `/agents/sessions/${sessionId}/events`,
+      { events: [event] },
+      key,
+    );
+  } catch (error) {
+    if (
+      error instanceof HttpError &&
+      error.status === 409 &&
+      event.type === "agent.session.input.tool_result"
+    ) {
+      const current = await api(env, `/agents/sessions/${sessionId}`);
+      if (
+        !(current.required_actions ?? []).some(
+          (a: any) =>
+            a.call_id === event.call_id && a.turn_id === event.turn_id,
+        )
+      )
+        return { already_accepted: true };
+    }
+    throw error;
+  }
+}

@@ -1,6 +1,15 @@
 import { DurableObject } from "cloudflare:workers";
 import { Env, HttpError } from "../types";
-import { api, digest, finalOf, textOf, json, readBody, vaultsFor } from "./api";
+import {
+  api,
+  digest,
+  finalOf,
+  textOf,
+  json,
+  readBody,
+  vaultsFor,
+  deliverEvent,
+} from "./api";
 import {
   MAIN_AGENT_ID,
   SPECIALISTS,
@@ -345,10 +354,10 @@ export class TravelSessionCoordinator extends DurableObject<Env> {
                         ).slice(0, 1000),
                       }),
                 };
-          await api(
+          await deliverEvent(
             this.env,
-            `/agents/sessions/${s.parent}/events`,
-            { events: [event] },
+            s.parent,
+            event,
             "travel-client-" + this.ctx.id.toString() + "-" + pending.key,
           );
           s.receipts[pending.key] = {
@@ -479,23 +488,20 @@ export class TravelSessionCoordinator extends DurableObject<Env> {
     });
   }
   private async returnResult(s: State, j: Job, suffix = "result") {
-    await api(
+    await deliverEvent(
       this.env,
-      `/agents/sessions/${s.parent}/events`,
+      s.parent!,
       {
-        events: [
-          {
-            type: "agent.session.input.tool_result",
-            turn_id: j.call.turn_id,
-            call_id: j.call.call_id,
-            success: true,
-            output: JSON.stringify(j.result),
-          },
-        ],
+        type: "agent.session.input.tool_result",
+        turn_id: j.call.turn_id,
+        call_id: j.call.call_id,
+        success: true,
+        output: JSON.stringify(j.result),
       },
       `travel-${suffix}-${j.call.call_id}`,
     );
     j.done = true;
+    if (j.result?.ok !== false) j.error = undefined;
   }
   private async advance(s: State, j: Job) {
     try {

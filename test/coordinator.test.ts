@@ -5,6 +5,7 @@ import {
   evictDurableObject,
 } from "cloudflare:test";
 import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
+import { deliverEvent } from "../src/travel/api";
 import { SPECIALISTS } from "../src/travel/tools";
 const mocks: any[] = [];
 const fetchMock = {
@@ -268,5 +269,32 @@ describe("durable coordinator", () => {
     await runInDurableObject(stub, async (_, state) =>
       state.storage.deleteAlarm(),
     );
+  });
+  it("reconciles an accepted result after a lost response and refuses a still-pending conflict", async () => {
+    const event = {
+      type: "agent.session.input.tool_result",
+      turn_id: "t",
+      call_id: "c",
+      success: true,
+      output: "{}",
+    };
+    fetchMock
+      .get(upstream)
+      .intercept({ path: "/v1/agents/sessions/recover/events", method: "POST" })
+      .reply(409, {});
+    get("/agents/sessions/recover", { required_actions: [] });
+    expect(
+      await deliverEvent(env as any, "recover", event, "recover-key"),
+    ).toEqual({ already_accepted: true });
+    fetchMock
+      .get(upstream)
+      .intercept({ path: "/v1/agents/sessions/recover/events", method: "POST" })
+      .reply(409, {});
+    get("/agents/sessions/recover", {
+      required_actions: [{ call_id: "c", turn_id: "t" }],
+    });
+    await expect(
+      deliverEvent(env as any, "recover", event, "recover-key"),
+    ).rejects.toThrow();
   });
 });
