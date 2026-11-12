@@ -16,6 +16,7 @@ const fetchMock = {
   }),
   activate: () =>
     vi.stubGlobal("fetch", async (url: string, init: any) => {
+      expect(init.headers.Authorization).toBe("Bearer test-travel-key");
       const i = mocks.findIndex(
         (m) =>
           m.origin + m.path === url &&

@@ -15,6 +15,7 @@ DIDA_ACCEPT_LANGUAGE = "en"
 # npx wrangler secret put APP_API_TOKEN
 # npx wrangler secret put IOS_GATEWAY_TOKEN
 # npx wrangler secret put OPENAI_API_KEY
+# npx wrangler secret put TRAVEL_OPENAI_API_KEY # project containing agents/manifest.json IDs
 # npx wrangler secret put DIDA_API_TOKEN
 
 [[durable_objects.bindings]]

@@ -48,4 +48,4 @@ capabilities 可选 `cards`、`local_trip_storage`。不填时仅文字；即使
 
 ## 部署
 
-`pnpm install --frozen-lockfile`、`pnpm typecheck`、`pnpm test`、`pnpm exec wrangler deploy --dry-run` 后部署。`wrangler.toml` 中的首次迁移创建 TRAVEL_SESSIONS SQLite Durable Object；后续部署沿用此迁移。保留现有五个 secret，不要提交 secret 值。已有 `/health`、`/mcp`、`/tools` 和旧接口保持兼容。
+`pnpm install --frozen-lockfile`、`pnpm typecheck`、`pnpm test`、`pnpm exec wrangler deploy --dry-run` 后部署。`wrangler.toml` 中的首次迁移创建 TRAVEL_SESSIONS SQLite Durable Object；后续部署沿用此迁移。新入口使用 TRAVEL_OPENAI_API_KEY（必须属于七个 Agent 所在的 OpenAI 项目），未配置时回退到 OPENAI_API_KEY。保留现有五个 secret，不要提交 secret 值。已有 `/health`、`/mcp`、`/tools` 和旧接口保持兼容。

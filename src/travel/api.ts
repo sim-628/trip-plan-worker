@@ -11,8 +11,10 @@ export async function api(
     const response = await fetch("https://api.openai.com/v1" + path, {
       method: body === undefined ? "GET" : "POST",
       headers: {
-        Authorization: "Bearer " + env.OPENAI_API_KEY,
+        Authorization:
+          "Bearer " + (env.TRAVEL_OPENAI_API_KEY ?? env.OPENAI_API_KEY),
         "OpenAI-Beta": "agents=v1",
+        "User-Agent": "TripPlan/1 CFNetwork",
         "Content-Type": "application/json",
         Accept: "application/json",
         ...(key ? { "Idempotency-Key": key } : {}),
@@ -25,7 +27,7 @@ export async function api(
       throw new HttpError(
         response.status >= 500 ? 502 : response.status,
         "Agent service request failed",
-        "AGENT_UPSTREAM_ERROR",
+        "AGENT_UPSTREAM_" + response.status,
       );
     }
     return await response.json();

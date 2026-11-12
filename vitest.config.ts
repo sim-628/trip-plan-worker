@@ -8,6 +8,7 @@ export default defineConfig({
         bindings: {
           APP_API_TOKEN: "test-gateway",
           OPENAI_API_KEY: "test-openai",
+          TRAVEL_OPENAI_API_KEY: "test-travel-key",
         },
       },
     }),
