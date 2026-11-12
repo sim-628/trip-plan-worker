@@ -30,7 +30,8 @@ export async function api(
         "AGENT_UPSTREAM_" + response.status,
       );
     }
-    return await response.json();
+    const raw = await response.text();
+    return raw ? JSON.parse(raw) : {};
   } finally {
     clearTimeout(timeout);
   }

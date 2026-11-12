@@ -25,7 +25,9 @@ const fetchMock = {
       );
       if (i < 0) throw Error("Unexpected HTTP request: " + url);
       const m = mocks.splice(i, 1)[0];
-      return Response.json(m.data, { status: m.status });
+      return m.status === 204
+        ? new Response(null, { status: 204 })
+        : Response.json(m.data, { status: m.status });
     }),
   disableNetConnect: () => {},
   assertNoPendingInterceptors: () => expect(mocks).toEqual([]),
@@ -237,7 +239,13 @@ describe("durable coordinator", () => {
     expect((await submit(result)).status).toBe(202);
     expect((await submit(result)).status).toBe(202);
     expect((await submit(result, "another-request-001")).status).toBe(409);
-    post("/agents/sessions/parent-write/events", {});
+    fetchMock
+      .get(upstream)
+      .intercept({
+        path: "/v1/agents/sessions/parent-write/events",
+        method: "POST",
+      })
+      .reply(204, null);
     get("/agents/sessions/parent-write", { required_actions: [] });
     get("/agents/sessions/parent-write/items?limit=100&order=desc", {
       data: [
