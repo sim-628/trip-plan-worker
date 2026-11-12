@@ -159,10 +159,33 @@ function visibleMessage(message: any) {
   return { ...message, text };
 }
 function mergeMessages(old: any[], fresh: any[]) {
-  const map = new Map<string, any>();
-  for (const message of [...old, ...fresh.map(visibleMessage)])
-    map.set(message.id ?? message.role + ":" + message.text, message);
-  return [...map.values()].slice(-200);
+  const messages = old.map(visibleMessage);
+  const incoming = fresh.map(visibleMessage);
+  const key = (m: any) => m.id ?? m.role + ":" + m.text;
+  for (let i = 0; i < incoming.length; i++) {
+    const message = incoming[i];
+    // Some session responses omit user input. The browser's durable copy is
+    // authoritative, including separate turns that happen to repeat the text.
+    if (
+      message.role === "user" &&
+      messages.some(
+        (m) => m.local && m.role === "user" && m.text === message.text,
+      )
+    )
+      continue;
+    const existing = messages.findIndex((m) => key(m) === key(message));
+    if (existing >= 0) messages[existing] = message;
+    else {
+      const next = incoming
+        .slice(i + 1)
+        .find((m) => messages.some((saved) => key(saved) === key(m)));
+      const index = next
+        ? messages.findIndex((m) => key(m) === key(next))
+        : messages.length;
+      messages.splice(index, 0, message);
+    }
+  }
+  return messages.slice(-200);
 }
 function drawCards(host: HTMLElement, cards: Thread["cards"]) {
   for (const call of Object.values(cards)) {
@@ -687,7 +710,11 @@ async function send() {
   await updateThread(t.id, {
     title: t.session ? t.title : input.slice(0, 25),
     timezone: $<HTMLSelectElement>("timezone").value,
-    optimistic: input,
+    messages: [
+      ...t.messages,
+      { id: crypto.randomUUID(), role: "user", text: input, local: true },
+    ],
+    optimistic: undefined,
     pending: { key: crypto.randomUUID(), body },
     status: "starting",
     error: undefined,

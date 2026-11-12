@@ -172,8 +172,59 @@ test("unknown send outcome retries the same idempotency key after reload", async
   await expect(page.locator("#error-banner")).toContainText("发送暂未确认");
   await page.reload();
   await expect(page.locator("#messages")).toContainText("连接成功");
+  await expect(page.locator(".user-bubble")).toHaveText("连接测试");
   expect(keys.length).toBeGreaterThanOrEqual(2);
   expect(new Set(keys).size).toBe(1);
+});
+
+test("user messages survive omitted upstream input and stay before each reply", async ({
+  page,
+}) => {
+  let turn = 0;
+  await page.route("**/test/api/**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path.endsWith("/me")) return route.fulfill({ json: { ok: true } });
+    if (request.method() === "POST") {
+      turn++;
+      return route.fulfill({
+        json: { id: sid, session_token: "fake-session" },
+      });
+    }
+    return route.fulfill({
+      json: {
+        status: "completed",
+        messages: [
+          { id: "answer-1", role: "assistant", text: "第一轮回答" },
+          ...(turn > 1
+            ? [
+                { id: "late-user", role: "user", text: "重复测试" },
+                { id: "answer-2", role: "assistant", text: "第二轮回答" },
+              ]
+            : []),
+        ],
+        dispatches: [],
+        required_actions: [],
+      },
+    });
+  });
+  await page.goto("/test/");
+  for (let i = 0; i < 2; i++) {
+    await page.getByLabel("发送旅行需求").fill("重复测试");
+    await page.getByRole("button", { name: "发送消息", exact: true }).click();
+    await expect(page.locator("#messages")).toContainText(
+      i === 0 ? "第一轮回答" : "第二轮回答",
+    );
+    await expect(page.locator("#run-status")).toContainText("本轮已完成");
+  }
+  await page.reload();
+  await expect(page.locator(".user-bubble")).toHaveCount(2);
+  await expect(page.locator("#messages > article")).toHaveText([
+    "重复测试",
+    "✳旅行规划助手第一轮回答",
+    "重复测试",
+    "✳旅行规划助手第二轮回答",
+  ]);
 });
 
 test("hotel cards show dates and both prices before acknowledging display", async ({
