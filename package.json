@@ -6,15 +6,25 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "export:tools": "node scripts/export-tools.mjs",
+    "build": "wrangler deploy --dry-run --outdir dist/worker",
+    "format": "prettier --write src/travel test vitest.config.ts scripts/export-tools.mjs"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "latest",
+    "@cloudflare/workers-types": "latest",
+    "esbuild": "^0.28.2",
+    "prettier": "^3.9.10",
     "typescript": "^5.9.3",
+    "vitest": "^4.1.0",
     "wrangler": "^4.45.0"
   },
   "dependencies": {
-    "agents": "^0.33.0",
     "@modelcontextprotocol/server": "2.4.0",
+    "agents": "^0.33.0",
     "zod": "^4.4.3"
-  }
+  },
+  "packageManager": "pnpm@11.25.0"
 }

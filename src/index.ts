@@ -1,3 +1,5 @@
+import { travelRoute } from "./travel/routes";
+export { TravelSessionCoordinator } from "./travel/coordinator";
 import { Env, HttpError } from "./types";
 import { OPENAI_TOOLS } from "./tools/definitions";
 import { executeTool, TOOL_NAMES } from "./tools/dispatcher";
@@ -218,6 +220,7 @@ function validateToolInput(name: string, args: Record<string, any>) {
 
 export default {
   async fetch(request: Request, env: Env, ctx: any): Promise<Response> {
+    if (new URL(request.url).pathname.startsWith("/travel/")) return travelRoute(request, env);
     const origin = env.ALLOWED_ORIGIN ?? "*";
     if (request.method === "OPTIONS") return new Response(null, {
       status: 204,

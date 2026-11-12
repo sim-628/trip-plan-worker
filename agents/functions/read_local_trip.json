@@ -1,0 +1,20 @@
+{
+  "type": "function",
+  "name": "read_local_trip",
+  "description": "让客户端读取用户本地行程。未知版本或修改已有行前必须读取；客户端返回 version 与五张表。",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "tripId": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "tripId"
+    ],
+    "additionalProperties": false
+  }
+}

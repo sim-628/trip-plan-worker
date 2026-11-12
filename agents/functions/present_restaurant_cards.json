@@ -1,0 +1,109 @@
+{
+  "description": "在 iOS 聊天中渲染餐厅卡片。用文字展示名称、菜系、价位、评分和地址。不要传 Google 坐标或路线。每次 1 到 8 张。",
+  "name": "present_restaurant_cards",
+  "parameters": {
+    "additionalProperties": false,
+    "properties": {
+      "cards": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "address": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "area": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cuisine": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "highlight": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "open_now": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "price_level": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "rating": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "rating_count": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "source": {
+              "enum": [
+                "google_places",
+                "dida_ticket",
+                "supplier",
+                "agent",
+                "user"
+              ],
+              "type": "string"
+            },
+            "source_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "rating_count",
+            "cuisine",
+            "price_level",
+            "source_id",
+            "source",
+            "open_now",
+            "highlight",
+            "rating",
+            "id",
+            "area",
+            "name",
+            "address"
+          ],
+          "type": "object"
+        },
+        "maxItems": 8,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "cards"
+    ],
+    "type": "object"
+  },
+  "type": "function"
+}

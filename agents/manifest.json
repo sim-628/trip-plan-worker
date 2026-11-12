@@ -1,0 +1,26 @@
+{
+  "mainAgent": {
+    "id": "agent_6af58877aba081919f47f36febadd36f"
+  },
+  "attractionAgent": {
+    "id": "agent_6af570901b348191bdc4d693661e4d47"
+  },
+  "flightAgent": {
+    "id": "agent_6af583f0a7c8819185a1d5f87e86655d"
+  },
+  "hotelSearchAgent": {
+    "id": "agent_6af584e0f8d08191b5801806d11edaa4"
+  },
+  "hotelStaticInfoAgent": {
+    "id": "agent_6af58549bd5c8191b37ae9279984d662"
+  },
+  "restaurantAgent": {
+    "id": "agent_6af585fca8b88191bde8dcc493d21362"
+  },
+  "tourAgent": {
+    "id": "agent_6af58755b9448191887745971505ec75"
+  },
+  "transAgent": {
+    "id": "agent_6af587b017d48191bc982a5865f2bf00"
+  }
+}

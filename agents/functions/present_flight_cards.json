@@ -1,0 +1,164 @@
+{
+  "description": "在 iOS 聊天中渲染机票卡片。只展示，不锁位、不购票。没有实时舱位报价时把 price 留空。每次 1 到 8 张。",
+  "name": "present_flight_cards",
+  "parameters": {
+    "additionalProperties": false,
+    "properties": {
+      "cards": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "airline": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "arrive_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cabin": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "depart_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "destination_code": {
+              "type": "string"
+            },
+            "destination_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "duration_label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "flight_number": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "origin_code": {
+              "type": "string"
+            },
+            "origin_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "price": {
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "amount",
+                "currency",
+                "label"
+              ],
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "price_note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "enum": [
+                "google_places",
+                "dida_ticket",
+                "supplier",
+                "agent",
+                "user"
+              ],
+              "type": "string"
+            },
+            "source_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "stop_summary": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "stops": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "arrive_at",
+            "airline",
+            "source_id",
+            "stop_summary",
+            "price",
+            "source",
+            "origin_name",
+            "destination_code",
+            "cabin",
+            "destination_name",
+            "stops",
+            "flight_number",
+            "depart_at",
+            "origin_code",
+            "id",
+            "duration_label",
+            "price_note"
+          ],
+          "type": "object"
+        },
+        "maxItems": 8,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "cards"
+    ],
+    "type": "object"
+  },
+  "type": "function"
+}

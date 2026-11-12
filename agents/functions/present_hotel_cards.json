@@ -1,0 +1,184 @@
+{
+  "description": "在 iOS 聊天中渲染酒店卡片。只展示，不预订。没有实时房价时把价格对象留空，并写 price_note。不要传坐标。每次 1 到 8 张。",
+  "name": "present_hotel_cards",
+  "parameters": {
+    "additionalProperties": false,
+    "properties": {
+      "cards": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "address": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "amenities": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 6,
+              "type": "array"
+            },
+            "area": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "check_in": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "check_out": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "guest_summary": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "highlight": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "night_count": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "nightly_price": {
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "amount",
+                "currency",
+                "label"
+              ],
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "price_note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "enum": [
+                "google_places",
+                "dida_ticket",
+                "supplier",
+                "agent",
+                "user"
+              ],
+              "type": "string"
+            },
+            "source_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "stars": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "total_price": {
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "amount",
+                "currency",
+                "label"
+              ],
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "area",
+            "address",
+            "stars",
+            "check_in",
+            "check_out",
+            "night_count",
+            "guest_summary",
+            "nightly_price",
+            "total_price",
+            "amenities",
+            "highlight",
+            "price_note",
+            "source",
+            "source_id"
+          ],
+          "type": "object"
+        },
+        "maxItems": 8,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "cards"
+    ],
+    "type": "object"
+  },
+  "type": "function"
+}

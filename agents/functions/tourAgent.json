@@ -1,0 +1,31 @@
+{
+  "type": "function",
+  "name": "tourAgent",
+  "description": "查询一日游、体验、演出和已确定景点的门票；不预订。 将符合该子 Agent 输入约定的完整 JSON 放入 request，必须带 today 和 tripId。",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "YYYY-MM-DD 当前日期"
+          },
+          "tripId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "today",
+          "tripId"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "required": [
+      "request"
+    ],
+    "additionalProperties": false
+  }
+}

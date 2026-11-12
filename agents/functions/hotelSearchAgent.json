@@ -1,0 +1,31 @@
+{
+  "type": "function",
+  "name": "hotelSearchAgent",
+  "description": "查询酒店与实时房价，或复核选定酒店的价格和入住人数。 将符合该子 Agent 输入约定的完整 JSON 放入 request，必须带 today 和 tripId。",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "today": {
+            "type": "string",
+            "description": "YYYY-MM-DD 当前日期"
+          },
+          "tripId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "today",
+          "tripId"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "required": [
+      "request"
+    ],
+    "additionalProperties": false
+  }
+}

@@ -1,4 +1,5 @@
 export interface Env {
+  TRAVEL_SESSIONS: DurableObjectNamespace;
   GOOGLE_MAPS_API_KEY: string;
   APP_API_TOKEN: string;
   IOS_GATEWAY_TOKEN?: string;

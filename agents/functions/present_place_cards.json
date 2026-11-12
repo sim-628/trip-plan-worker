@@ -1,0 +1,95 @@
+{
+  "description": "在 iOS 聊天中渲染地点卡片。用文字展示名称、类别、区域和推荐理由。不要传坐标、polyline 或 viewport。每次 1 到 8 张。",
+  "name": "present_place_cards",
+  "parameters": {
+    "additionalProperties": false,
+    "properties": {
+      "cards": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "address": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "area": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "category": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "highlight": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "rating": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "rating_count": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "source": {
+              "enum": [
+                "google_places",
+                "dida_ticket",
+                "supplier",
+                "agent",
+                "user"
+              ],
+              "type": "string"
+            },
+            "source_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "area",
+            "id",
+            "rating",
+            "rating_count",
+            "category",
+            "source_id",
+            "highlight",
+            "source",
+            "address",
+            "name"
+          ],
+          "type": "object"
+        },
+        "maxItems": 8,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "cards"
+    ],
+    "type": "object"
+  },
+  "type": "function"
+}

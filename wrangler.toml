@@ -16,3 +16,14 @@ DIDA_ACCEPT_LANGUAGE = "en"
 # npx wrangler secret put IOS_GATEWAY_TOKEN
 # npx wrangler secret put OPENAI_API_KEY
 # npx wrangler secret put DIDA_API_TOKEN
+
+[[durable_objects.bindings]]
+name = "TRAVEL_SESSIONS"
+class_name = "TravelSessionCoordinator"
+
+[[migrations]]
+tag = "travel-agents-v1"
+new_sqlite_classes = ["TravelSessionCoordinator"]
+
+[observability]
+enabled = true

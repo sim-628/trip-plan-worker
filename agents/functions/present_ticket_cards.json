@@ -1,0 +1,156 @@
+{
+  "description": "在 iOS 聊天中渲染门票卡片。只展示，不下单。目录起价不是确认报价时，在 price_note 标明。不要传坐标。每次 1 到 8 张。",
+  "name": "present_ticket_cards",
+  "parameters": {
+    "additionalProperties": false,
+    "properties": {
+      "cards": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "availability": {
+              "enum": [
+                "available",
+                "limited",
+                "sold_out",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            "city": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "date_label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "package_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "party_summary": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "price_note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "quantity": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "rules": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sku_code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "enum": [
+                "google_places",
+                "dida_ticket",
+                "supplier",
+                "agent",
+                "user"
+              ],
+              "type": "string"
+            },
+            "source_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "title": {
+              "type": "string"
+            },
+            "unit_price": {
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "amount",
+                "currency",
+                "label"
+              ],
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "venue": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "title",
+            "source_id",
+            "package_name",
+            "quantity",
+            "source",
+            "city",
+            "party_summary",
+            "venue",
+            "date_label",
+            "price_note",
+            "id",
+            "unit_price",
+            "sku_code",
+            "rules"
+          ],
+          "type": "object"
+        },
+        "maxItems": 8,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "cards"
+    ],
+    "type": "object"
+  },
+  "type": "function"
+}
