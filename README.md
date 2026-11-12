@@ -5,6 +5,7 @@
 - [新旅行接口](docs/travel-api.md)
 - [OpenAI Platform 函数配置与完整 JSON](docs/platform-functions.md)
 - [本地五张表的写入流程](docs/local-trip-storage.md)
+- [五类真实场景与 12 项测试记录](docs/verification-2026-11-12.md)
 
 新客户端使用 `/travel/v1/sessions`；旧 `/agents/sessions` 仍是兼容转发接口，不自动执行新增的调度。
 
