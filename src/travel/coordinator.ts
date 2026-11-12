@@ -321,6 +321,7 @@ export class TravelSessionCoordinator extends DurableObject<Env> {
             "travel-parent-" + this.ctx.id.toString(),
           );
           s.parent = created.id;
+          s.activeUntil = Date.now() + TURN_LIMIT;
           s.input = "";
           s.status = "running";
           s.awaitingTurn = true;
@@ -627,7 +628,7 @@ export class TravelSessionCoordinator extends DurableObject<Env> {
     } catch (e) {
       j.attempts++;
       j.error = e instanceof HttpError ? e.code : "SPECIALIST_NETWORK_ERROR";
-      if (j.attempts >= 4)
+      if (j.attempts >= 4 && !j.result)
         j.result = { ok: false, error: j.error, agent: j.call.name };
       await this.save(s);
     }

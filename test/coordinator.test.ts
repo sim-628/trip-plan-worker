@@ -297,4 +297,40 @@ describe("durable coordinator", () => {
       deliverEvent(env as any, "recover", event, "recover-key"),
     ).rejects.toThrow();
   });
+  it("keeps a completed specialist result intact while delivery retries fail", async () => {
+    const { stub } = await create();
+    fetchMock
+      .get(upstream)
+      .intercept({
+        path: "/v1/agents/sessions/retry-parent/events",
+        method: "POST",
+      })
+      .reply(500, {});
+    const outcome = await runInDurableObject(
+      stub,
+      async (instance: any, state) => {
+        const s = await instance.load();
+        s.parent = "retry-parent";
+        const job = {
+          call: {
+            name: "transAgent",
+            call_id: "retry-call",
+            turn_id: "retry-turn",
+          },
+          started: Date.now(),
+          attempts: 3,
+          result: { ok: true, data: { trains: ["verified-result"] } },
+        };
+        s.jobs["retry-call"] = job;
+        await instance.advance(s, job);
+        await state.storage.deleteAlarm();
+        return job;
+      },
+    );
+    expect(outcome.attempts).toBe(4);
+    expect(outcome.result).toEqual({
+      ok: true,
+      data: { trains: ["verified-result"] },
+    });
+  });
 });
