@@ -1,3 +1,4 @@
+import { testUI } from "./web/handler";
 import { travelRoute } from "./travel/routes";
 export { TravelSessionCoordinator } from "./travel/coordinator";
 import { Env, HttpError } from "./types";
@@ -221,6 +222,8 @@ function validateToolInput(name: string, args: Record<string, any>) {
 export default {
   async fetch(request: Request, env: Env, ctx: any): Promise<Response> {
     if (new URL(request.url).pathname.startsWith("/travel/")) return travelRoute(request, env);
+    const page = await testUI(request, env);
+    if (page) return page;
     const origin = env.ALLOWED_ORIGIN ?? "*";
     if (request.method === "OPTIONS") return new Response(null, {
       status: 204,

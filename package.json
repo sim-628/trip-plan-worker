@@ -4,17 +4,22 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit",
+    "dev": "node scripts/build-web.mjs && wrangler dev",
+    "deploy": "node scripts/build-web.mjs && wrangler deploy",
+    "typecheck": "tsc --noEmit && tsc -p web/tsconfig.json --noEmit",
     "test": "vitest run",
     "export:tools": "node scripts/export-tools.mjs",
-    "build": "wrangler deploy --dry-run --outdir dist/worker",
-    "format": "prettier --write src/travel test vitest.config.ts scripts/export-tools.mjs"
+    "build": "node scripts/build-web.mjs && wrangler deploy --dry-run --outdir dist/worker",
+    "format": "prettier --write src/travel test vitest.config.ts scripts/export-tools.mjs",
+    "build:web": "node scripts/build-web.mjs",
+    "pretest": "node scripts/build-web.mjs",
+    "pretypecheck": "node scripts/build-web.mjs",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "latest",
     "@cloudflare/workers-types": "latest",
+    "@playwright/test": "^1.65.0",
     "esbuild": "^0.28.2",
     "prettier": "^3.9.10",
     "typescript": "^5.9.3",

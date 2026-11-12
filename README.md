@@ -2,6 +2,7 @@
 
 新增：七个固定子 Agent 的后台调度，以及未来 App 的本地行程读写协议。
 
+- [浏览器测试界面](docs/browser-test-ui.md)
 - [新旅行接口](docs/travel-api.md)
 - [OpenAI Platform 函数配置与完整 JSON](docs/platform-functions.md)
 - [本地五张表的写入流程](docs/local-trip-storage.md)

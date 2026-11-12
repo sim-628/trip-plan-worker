@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f6f0" />
+    <title>行旅 · 旅行规划测试台</title>
+    <link rel="stylesheet" href="/test/styles.css" />
+    <script type="module" src="/test/app.js"></script>
+  </head>
+  <body>
+    <div id="login" class="login-screen" hidden>
+      <form id="login-form" class="login-card">
+        <div class="brand-mark">↗</div>
+        <span class="eyebrow">TRIP PLAN · PRIVATE PREVIEW</span>
+        <h1>开始一段新旅程</h1>
+        <p>连接你的旅行规划助手，在浏览器里试一试。</p>
+        <label for="access-code">测试访问码</label
+        ><input
+          id="access-code"
+          type="password"
+          autocomplete="current-password"
+          placeholder="输入访问码"
+          required
+        /><button class="primary" type="submit">
+          进入测试台 <span>↗</span>
+        </button>
+        <p id="login-error" role="alert"></p>
+        <small>使用专属链接时会自动进入。无需填写 OpenAI 密钥。</small>
+      </form>
+    </div>
+    <div id="app" class="app-shell" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="/test/" aria-label="行旅首页"
+          ><span class="brand-mark">↗</span
+          ><span>行旅 <small>TRIP PLAN</small></span></a
+        >
+        <div class="workspace-label">旅行规划测试台 <span>PREVIEW</span></div>
+        <button id="new-chat" class="new-chat">
+          ＋ <span>开启新对话</span>
+        </button>
+        <div class="section-label">最近的对话</div>
+        <nav id="history" aria-label="历史对话"></nav>
+        <div class="sidebar-bottom">
+          <div class="connection">
+            <span id="connection-dot" class="dot"></span
+            ><span id="connection-label">正在连接…</span>
+          </div>
+          <label class="timezone-label" for="timezone">行程参考时区</label
+          ><select id="timezone">
+            <option value="Asia/Shanghai">中国 · 上海</option>
+            <option value="Asia/Tokyo">日本 · 东京</option>
+            <option value="Europe/London">英国 · 伦敦</option>
+            <option value="America/New_York">美国 · 纽约</option></select
+          ><button id="logout" class="quiet">退出测试台</button>
+        </div>
+      </aside>
+      <main class="conversation">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">YOUR TRAVEL COMPANION</span>
+            <h1 id="conversation-title">和旅行规划助手聊聊</h1>
+          </div>
+          <button
+            id="new-chat-mobile"
+            class="mobile-new"
+            aria-label="开启新对话"
+          >
+            ＋</button
+          ><button
+            id="toggle-inspector"
+            class="inspector-toggle"
+            aria-expanded="false"
+          >
+            行程与进度 <span>↗</span>
+          </button>
+        </header>
+        <div id="message-scroll" class="message-scroll">
+          <section id="welcome" class="welcome">
+            <div class="welcome-symbol" aria-hidden="true">✳</div>
+            <p class="eyebrow">从一个想法出发</p>
+            <h2>想去哪里走走？</h2>
+            <p class="welcome-description">
+              告诉我目的地、时间和偏好。<br />交通、住宿与沿途的好去处，交给我们一起整理。
+            </p>
+            <div id="presets" class="presets"></div>
+            <div class="welcome-note">
+              <span class="tiny-line"></span>可以先比较，再决定放进行程
+            </div>
+          </section>
+          <div
+            id="messages"
+            aria-live="polite"
+            aria-relevant="additions text"
+          ></div>
+          <div id="tool-action" class="tool-action" hidden></div>
+        </div>
+        <div class="composer-area">
+          <div id="run-status" class="run-status" aria-live="polite"></div>
+          <div id="error-banner" class="error-banner" role="alert" hidden></div>
+          <form id="composer" class="composer">
+            <label class="sr-only" for="message-input">发送旅行需求</label
+            ><textarea
+              id="message-input"
+              rows="2"
+              placeholder="例如：想去东京玩三天，喜欢博物馆和城市散步…"
+              maxlength="20000"
+            ></textarea>
+            <div class="composer-bottom">
+              <span>Enter 发送 · Shift + Enter 换行</span
+              ><button
+                id="send"
+                class="send-button"
+                type="submit"
+                aria-label="发送消息"
+              >
+                ↑
+              </button>
+            </div>
+          </form>
+          <p class="composer-note">
+            查询与规划，不下单付款。保存行程前会请你确认。
+          </p>
+        </div>
+      </main>
+      <aside id="inspector" class="inspector">
+        <div class="inspector-header">
+          <div>
+            <span class="eyebrow">BEHIND THE PLAN</span>
+            <h2>一起把旅程做好</h2>
+          </div>
+          <button
+            id="close-inspector"
+            class="icon-button"
+            aria-label="关闭行程面板"
+          >
+            ×
+          </button>
+        </div>
+        <div class="mobile-history">
+          <label for="history-select">最近的对话</label
+          ><select id="history-select"></select>
+        </div>
+        <section class="agent-section">
+          <div class="section-heading">
+            <h3>助手协作</h3>
+            <span id="agent-count">0 / 7</span>
+          </div>
+          <div id="agents" class="agents"></div>
+        </section>
+        <section class="local-section">
+          <div class="section-heading">
+            <h3>本地行程</h3>
+            <span class="local-badge">仅此浏览器</span>
+          </div>
+          <label for="trip-select" class="sr-only">选择当前行程</label
+          ><select id="trip-select">
+            <option value="">新行程</option>
+          </select>
+          <div id="trip-summary" class="trip-summary">
+            <span class="empty-icon">▱</span>
+            <p>还没有保存的行程</p>
+            <small
+              >对助手说「把它加入行程」，<br />确认后就会出现在这里。</small
+            >
+          </div>
+          <div
+            id="table-tabs"
+            class="table-tabs"
+            role="tablist"
+            aria-label="行程表"
+          ></div>
+          <div id="table-records" class="table-records"></div>
+          <button id="export-trip" class="export-button" disabled>
+            ↓ 导出行程 JSON
+          </button>
+        </section>
+        <footer class="inspector-footer">
+          行程保存在当前浏览器，清除浏览器数据会一并移除。你授权读取的行程内容会用于云端对话。
+        </footer>
+      </aside>
+    </div>
+    <div id="toast" role="status" class="toast" hidden></div>
+  </body>
+</html>

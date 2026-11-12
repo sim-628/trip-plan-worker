@@ -7,11 +7,12 @@ export default defineConfig({
       miniflare: {
         bindings: {
           APP_API_TOKEN: "test-gateway",
+          TEST_UI_ACCESS_CODE: "test-private-code",
           OPENAI_API_KEY: "test-openai",
           TRAVEL_OPENAI_API_KEY: "test-travel-key",
         },
       },
     }),
   ],
-  test: { testTimeout: 30000 },
+  test: { testTimeout: 30000, include: ["test/**/*.test.ts"] },
 });

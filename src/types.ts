@@ -1,4 +1,5 @@
 export interface Env {
+  TEST_UI_ACCESS_CODE?: string;
   TRAVEL_SESSIONS: DurableObjectNamespace;
   GOOGLE_MAPS_API_KEY: string;
   APP_API_TOKEN: string;
